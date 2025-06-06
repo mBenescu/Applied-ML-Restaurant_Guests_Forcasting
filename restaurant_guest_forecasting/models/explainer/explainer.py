@@ -7,12 +7,6 @@ import matplotlib.pyplot as plt
 import torch
 from restaurant_guest_forecasting.models.mlp.mlp import MultiTaskMLP
 
-from restaurant_guest_forecasting.data.train_test_split import \
-    train_val_test_data
-from restaurant_guest_forecasting.data.normalization import \
-    normalize_df
-import os
-
 
 class PredictionsExplainer():
     def __init__(self,
@@ -29,9 +23,11 @@ class PredictionsExplainer():
             test_data (Union[pd.DataFrame, np.ndarray]): Test data for
             generating SHAP values.
         """
+        # Ensure model is a PyTorch module
         if not isinstance(model, nn.Module):
             raise TypeError("model must be an instance of torch.nn.Module")
 
+        # Validate types for training and test data
         if not isinstance(train_data, (pd.DataFrame)):
             raise TypeError("train_data must be a pandas DataFrame")
 
@@ -61,13 +57,21 @@ class PredictionsExplainer():
 
         predictions = []
 
+        # Run model inference without tracking gradients
         with torch.no_grad():
             for row in range(X.shape[0]):
+                # Convert each row to a torch tensor
                 X_tensor = torch.tensor(X[row], dtype=torch.float32).\
                     unsqueeze(0).to(device)
+
+                # Get model output
                 outputs = self.model(X_tensor)
+
+                # Handle models that return a list of outputs
                 if isinstance(outputs, list):
                     outputs = outputs[0]
+
+                # Detach and convert to numpy
                 pred = outputs.detach().cpu().numpy().flatten()
                 predictions.append(pred)
 
@@ -86,20 +90,29 @@ class PredictionsExplainer():
         Returns:
             shap.Explanation: SHAP values for the selected test instance.
         """
+        # Check if sample_size is within valid range
         if sample_size > len(self.train_data):
             raise ValueError("sample_size exceeds the number of available \
                              training samples.")
 
+        # Ensure test_index is valid
         if test_index >= len(self.test_data):
             raise IndexError("test_index is out of bounds for the test data.")
 
+        # Sample background data from training set
         background_data = self.train_data.sample(n=sample_size,
                                                  random_state=42)
+
+        # Extract the specific test instance to explain
         test_instance = self.test_data.iloc[test_index:test_index + 1, :]\
             .to_numpy()
 
+        # Create SHAP KernelExplainer with the prediction wrapper and
+        # background
         explainer = shap.KernelExplainer(self._predict_wrapper,
                                          background_data)
+
+        # Compute SHAP values for the test instance
         shap_values = explainer(test_instance)
 
         return shap_values
@@ -117,47 +130,16 @@ class PredictionsExplainer():
             scale_factor (float): Factor to scale SHAP values for better
             visualization.
         """
+        # Calculate SHAP values for the selected instance
         shap_values = self._calculate_shap_values(sample_size=sample_size,
                                                   test_index=test_index)
 
+        # Plot a waterfall chart of SHAP values, scaling for visibility
         shap.plots.waterfall(shap_values[0] * scale_factor, show=False)
+
+        # Add a title and display the plot
         plt.title(
             f"KernelExplainer SHAP Waterfall Plot \
             (background size: {sample_size}, test index: {test_index})"
         )
         plt.show()
-
-
-if __name__ == "__main__":
-    # Loading train and test datasets
-    train_df, _, test_df = train_val_test_data()
-
-    # Data normalization
-    X_train, _ = normalize_df(train_df, is_train=True)
-    X_test, _ = normalize_df(test_df, is_train=False)
-
-    # Initializing the model with the same architecture as the trained model
-    input_size = X_train.shape[1]
-    neurons = [input_size] + [1024]*6 + [512, 256, 128]
-
-    single_task_mlp = MultiTaskMLP(num_neurons=neurons,
-                                   droput_rate=0.0,
-                                   activation="relu",
-                                   output_neurons=[1])
-
-    # Setting the path of the saved model
-    model_path = os.path.join(os.path.dirname(__file__),
-                              "..",
-                              "utils",
-                              "saved_models",
-                              "guests_mlp.pt")
-
-    # Load the state dictionary
-    state_dict = torch.load(model_path, map_location='cpu')
-
-    # Load into model
-    single_task_mlp.load_state_dict(state_dict)
-
-    # Making a shap plot for a single prediction
-    predictor = PredictionsExplainer(single_task_mlp, X_train, X_test)
-    predictor.shap_plot(sample_size=10)
