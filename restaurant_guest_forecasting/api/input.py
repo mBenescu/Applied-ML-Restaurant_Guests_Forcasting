@@ -3,7 +3,9 @@ from typing import Literal, Optional
 from datetime import datetime
 import pandas as pd
 
+import torch
 
+DTYPE = torch.float64
 class ModelInput(BaseModel):
     """
     DTO holding model input.
@@ -50,6 +52,8 @@ class ModelInput(BaseModel):
         date_obj = datetime(self.year, self.month, self.day)
 
         # Step 3: Add derived time features
+        base["year"] = date_obj.year
+        base["month"] = date_obj.month
         base["day_of_year"] = date_obj.timetuple().tm_yday
         base["is_Monday"] = int(date_obj.weekday() == 0)
         base["is_Tuesday"] = int(date_obj.weekday() == 1)
@@ -96,6 +100,16 @@ class ModelInput(BaseModel):
         # Order the columns, so the order always matches
         df = df.reindex(sorted(df.columns), axis=1)
         return df
+    
+    def to_tensor(self) -> torch.Tensor:
+        """
+        Converts the model input to a PyTorch tensor.
+        
+        Returns:
+            torch.Tensor: A tensor representation of the model input.
+        """
+        df = self.to_df()
+        return torch.tensor(df.to_numpy(), dtype=DTYPE, requires_grad=False)
 
     
     def is_valid(self) -> bool:
