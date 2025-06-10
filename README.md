@@ -36,13 +36,13 @@ In this step of the project, we curated the dataset to predict the daily guest a
 3. To make sure validation and test data are well-balanced, we assigned the **even-numbered days** to the **validation set** and the **odd-numbered days** to the **test set**. Since a week has an even number of days, the validation and test data will alternate in which days will contain.
 
 ## Deployment Models
-In this step of the project, we trained and saved two models (a Random Guesser and a Linear Regression Model) that predict how many guests will visit a restaurant on a given day. 
+In this step of the project, we trained and saved three models (a Random Guesser, a Linear Regression Model and a multilayer perceptron) that predict how many guests will visit a restaurant on a given day. 
 
 ### Steps we followed
-1. We started the process by loading the data, which has already been split into training, validation and test sets (as explained before). However, we only used the training and validation data for now.
+1. We started the process by loading the data, which has already been split into training, validation and test sets (as explained before). 
 2. Then, we took the date column and broke it down into useful features, such as the year, month, and day of the year, to make the model understand things like seasonal trends or holidays, without needing the raw date.
 3. As a next step, we trained each model using the training data. Once a model was trained, we saved it to a file, so we don’t need to retrain it every time we want to use it.
-4. Since we had evaluation turned on by default, we also tested how well each model performed. We did this by calculating the Mean Squared Error (MSE), which told us how far off the predictions were from the actual number of guests.
+4. Since we had evaluation turned on by default, we also tested how well each model performed. We did this by calculating the Mean Squared Error (MSE) and an asymmetric loss, which told us how far off the predictions were from the actual number of guests.
 
 ## API
 We created an API that allows users to send an input and get a prediction back, from a trained model. The API offers the option to use and compare two models: a Random Guesser, as well as a Linear Regression Model. It also includes proper input validation and returns clear responses, handling HTTPExceptions when something goes wrong.
@@ -58,11 +58,11 @@ restaurant_guest_forecasting/
 │   ├── random_guesser/
 │   │   └── random_regression_guesser.py   
 │   └── utils/
+│   |   ├── saved_models
 │   |   ├── evaluate_models.py  
 │   |   ├── load_models.py       
-│       └── train_models.py
-|       └── saved_models.py 
-
+│   |   ├── train_base_model.py
+|       └── train_mlp.py 
 ```
 
 - **app.py**: The main FastAPI application file.
@@ -71,13 +71,15 @@ restaurant_guest_forecasting/
 
 - **random_regression_guesser.py**: Implements a Random Regression Guesser that always predicts the average value of the target in the training dataset.
 
-- **evaluate_models.py**: Runs the given model on the validation data and returns the Mean Squared Error (MSE).
+- **saved_models**: Contains all the saved models.
+
+- **evaluate_models.py**: Runs the given model on the test data and returns the Mean Squared Error (MSE) and the asymmetric loss.
   
 - **load_models.py**: Loads the saved models.
 
-- **train_models.py**: Trains a given model (either the Random Guesser or the Linear Regression), and then saves it in *saved_models* directory.
+- **train__base_model.py**: Trains a given model (either the Random Guesser or the Linear Regression), and then saves it in *saved_models* directory.
 
-- **saved_models.py**: Contains all the saved models.
+- **train_mlp.py** Trains a multilayer perceptron and saves it in *saved_models* directory. 
 
 ### How to install dependencies and launch the API
 1. Open a terminal
@@ -158,6 +160,15 @@ http://127.0.0.1:8000/
 }
 ```
 
+- **POST /predict_guests/mlp**: Predict the number of guests using a trained multilayer perceptron model.
+
+**Output example**
+```bash
+{
+  "predicted_guests": "64.0"
+}
+```
+
 - **GET /predict_guests/random/eval**: Returns the validation MSE for the Random Guesser.
 
 **Output example**
@@ -176,13 +187,17 @@ http://127.0.0.1:8000/
 }
 ```
 
-- **GET /predict_guests/compare**: Compare validation MSEs for both models.
+- **GET /predict_guests/compare**: Compare test MSEs for the random guesser, Linear Regression and multilayer preceptron models.
 
 **Output example**
 ```bash
 {
-  "random_guess_val_mse": "1555.73",
-  "model_val_mse": "1031.31"
+  "random_guess_test_mse": "1348.24",
+  "random_guess_asymmetric_test_mse": "1728.57",
+  "linear_regression_test_mse": "902.27",
+  "linear_regression_asymmetric_test_mse": "2305.17",
+  "mlp_test_mse": "1358.93",
+  "mlp_asymmetric_test_mse": "1708.43"
 }
 ```
 
@@ -223,3 +238,11 @@ PYTHONPATH="." streamlit run restaurant_guest_forecasting/streamlit/app.py
 ```
 
 or use the `start_ui.sh` script.
+
+## Explain predictions
+To understand why our models make certain predictions, we used SHAP (SHapley Additive exPlanations): a powerful tool for interpreting machine learning models.
+
+We generated a waterfall plot using SHAP values to break down the prediction of an individual instance and show how each feature contributed to the final prediction. This helps to:
+- Visualize feature importance for specific predictions.
+- Explain model behavior in a transparent and intuitive way.
+- Build trust and accountability in the prediction process.

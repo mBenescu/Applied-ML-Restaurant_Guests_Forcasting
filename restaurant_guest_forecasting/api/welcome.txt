@@ -11,6 +11,9 @@ Predict the number of guests using a random guesser (baseline model that always 
 - POST /predict_guests/model
 Predict the number of guests using a trained Linear Regression model.
 
+- POST /predict_guests/mlp
+Predict the number of guests using a trained multilayer perceptron model. 
+
 - GET /predict_guests/random/eval
 Returns the validation MSE for the random guesser.
 
@@ -18,6 +21,6 @@ Returns the validation MSE for the random guesser.
 Returns the validation MSE for the linear regression model.
 
 - GET /predict_guests/compare
-Compare validation MSEs for both models.
+Compare validation MSEs for all three models.
 
 Tip: Visit /docs for interactive documentation.
