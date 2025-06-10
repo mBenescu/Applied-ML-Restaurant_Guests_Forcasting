@@ -147,7 +147,7 @@ http://127.0.0.1:8000/
 **Output example**
 ```bash
 {
-  "predicted_guests": "96.00"
+  "predicted_guests": "96"
 }
 ```
 
@@ -156,7 +156,7 @@ http://127.0.0.1:8000/
 **Output example**
 ```bash
 {
-  "predicted_guests": "150.02"
+  "predicted_guests": "150"
 }
 ```
 
@@ -165,7 +165,7 @@ http://127.0.0.1:8000/
 **Output example**
 ```bash
 {
-  "predicted_guests": "64.0"
+  "predicted_guests": "64"
 }
 ```
 
