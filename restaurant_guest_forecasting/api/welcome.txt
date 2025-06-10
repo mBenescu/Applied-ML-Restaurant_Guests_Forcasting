@@ -21,6 +21,6 @@ Returns the validation MSE for the random guesser.
 Returns the validation MSE for the linear regression model.
 
 - GET /predict_guests/compare
-Compare validation MSEs for all three models.
+Compare test MSEs and test asymmectric loss for the random guesser, Linear Regression and multilayer preceptron models.
 
 Tip: Visit /docs for interactive documentation.

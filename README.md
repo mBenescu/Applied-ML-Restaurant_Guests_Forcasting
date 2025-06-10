@@ -187,7 +187,7 @@ http://127.0.0.1:8000/
 }
 ```
 
-- **GET /predict_guests/compare**: Compare test MSEs for the random guesser, Linear Regression and multilayer preceptron models.
+- **GET /predict_guests/compare**: Compare test MSEs and test asymmectric loss for the random guesser, Linear Regression and multilayer preceptron models.
 
 **Output example**
 ```bash
