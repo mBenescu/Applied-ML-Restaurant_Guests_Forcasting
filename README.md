@@ -45,7 +45,7 @@ In this step of the project, we trained and saved three models (a Random Guesser
 4. Since we had evaluation turned on by default, we also tested how well each model performed. We did this by calculating the Mean Squared Error (MSE) and an asymmetric loss, which told us how far off the predictions were from the actual number of guests.
 
 ## API
-We created an API that allows users to send an input and get a prediction back, from a trained model. The API offers the option to use and compare two models: a Random Guesser, as well as a Linear Regression Model. It also includes proper input validation and returns clear responses, handling HTTPExceptions when something goes wrong.
+We created an API that allows users to send an input and get a prediction back, from a trained model. The API offers the option to use and compare three models: a Random Guesser, a Linear Regression Model, and a Multi-Layer Perceptron. It also includes proper input validation and returns clear responses, handling HTTPExceptions when something goes wrong.
 
 ### Structure
 ```
