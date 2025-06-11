@@ -57,12 +57,16 @@ restaurant_guest_forecasting/
 ├── models/
 │   ├── random_guesser/
 │   │   └── random_regression_guesser.py   
-│   └── utils/
+│   ├── utils/
 │   |   ├── saved_models
 │   |   ├── evaluate_models.py  
 │   |   ├── load_models.py       
 │   |   ├── train_base_model.py
-|       └── train_mlp.py 
+|   |   └── train_mlp.py 
+|   └── mlp/
+│       ├── activation_factory.py
+│       ├── mlp.py
+│       └── train_loop.py
 ```
 
 - **app.py**: The main FastAPI application file.
@@ -79,7 +83,13 @@ restaurant_guest_forecasting/
 
 - **train__base_model.py**: Trains a given model (either the Random Guesser or the Linear Regression), and then saves it in *saved_models* directory.
 
-- **train_mlp.py** Trains a multilayer perceptron and saves it in *saved_models* directory. 
+- **train_mlp.py** Trains a multilayer perceptron and saves it in *saved_models* directory.
+
+- **activation_factory.py** Defines an ActivationFactory class that provides a method to create PyTorch activation function modules (ReLU, Tanh, or Sigmoid).
+
+- **mlp.py** Defines an abstract base class (MLPBase) and a multi-task learning MLP implementation (MultiTaskMLP) that build customizable feedforward neural networks with configurable hidden layers, dropout, and activation functions.
+
+- **train_loop.py** Defines a training loop for a multi-task MLP model, handling multiple loss functions and tracking per-task training and validation losses across epochs.
 
 ### How to install dependencies and launch the API
 1. Open a terminal
@@ -202,6 +212,13 @@ http://127.0.0.1:8000/
 ```
 
 - **/docs**: Leads to API documentation in Swagger.
+
+## MLP
+The model takes as input various features (date, weather conditions, etc.) and processed them through various hidden layers. Each hidden layer performs a linear transformation, followed by a non-linear activation function (ReLU) and a dropout. 
+
+After conducting a hyperparameter search, we found that the model could not overfit, indicating no need for regularizatio. The best-performing configuration used no dropout (dropout rate = 0.0) and no L2 regularization. The optimal architecture consisted of 6 hidden layers, each with 37 neurons (matching the input size). Based on these findings, we adopted this architecture for our model.
+
+A key strength of our architecture is its support for Multi-task learning (restaurant guests & article popularity). For this, we incorporated multiple output heads, each dedicated to a specific task. To optimize performance, we used a custom Asymmetric Loss Function.
 
 ### Docker
 
