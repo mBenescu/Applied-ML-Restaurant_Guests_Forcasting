@@ -36,16 +36,16 @@ In this step of the project, we curated the dataset to predict the daily guest a
 3. To make sure validation and test data are well-balanced, we assigned the **even-numbered days** to the **validation set** and the **odd-numbered days** to the **test set**. Since a week has an even number of days, the validation and test data will alternate in which days will contain.
 
 ## Deployment Models
-In this step of the project, we trained and saved three models (a Random Guesser, a Linear Regression Model and a multilayer perceptron) that predict how many guests will visit a restaurant on a given day. 
+In this step of the project, we trained and saved three models (a Random Guesser, a Linear Regression Model and a Multilayer Perceptron) that predict how many guests will visit a restaurant on a given day. 
 
 ### Steps we followed
 1. We started the process by loading the data, which has already been split into training, validation and test sets (as explained before). 
 2. Then, we took the date column and broke it down into useful features, such as the year, month, and day of the year, to make the model understand things like seasonal trends or holidays, without needing the raw date.
 3. As a next step, we trained each model using the training data. Once a model was trained, we saved it to a file, so we don’t need to retrain it every time we want to use it.
-4. Since we had evaluation turned on by default, we also tested how well each model performed. We did this by calculating the Mean Squared Error (MSE) and an asymmetric loss, which told us how far off the predictions were from the actual number of guests.
+4. Since we had evaluation turned on by default, we also tested how well each model performed. We did this by calculating the Mean Squared Error (MSE) and an Asymmetric Loss, which told us how far off the predictions were from the actual number of guests.
 
 ## API
-We created an API that allows users to send an input and get a prediction back, from a trained model. The API offers the option to use and compare three models: a Random Guesser, a Linear Regression Model, and a Multi-Layer Perceptron. It also includes proper input validation and returns clear responses, handling HTTPExceptions when something goes wrong.
+We created an API that allows users to send an input and get a prediction back, from a trained model. The API offers the option to use and compare three models: a Random Guesser, a Linear Regression Model, and a Multilayer Perceptron. It also includes proper input validation and returns clear responses, handling HTTPExceptions when something goes wrong.
 
 ### Structure
 ```
@@ -216,7 +216,7 @@ http://127.0.0.1:8000/
 ## MLP
 The model takes as input various features (date, weather conditions, etc.) and processed them through various hidden layers. Each hidden layer performs a linear transformation, followed by a non-linear activation function (ReLU) and a dropout. 
 
-After conducting a hyperparameter search, we found that the model could not overfit, indicating no need for regularizatio. The best-performing configuration used no dropout (dropout rate = 0.0) and no L2 regularization. The optimal architecture consisted of 6 hidden layers, each with 37 neurons (matching the input size). Based on these findings, we adopted this architecture for our model.
+After conducting a hyperparameter search, we found that the model could not overfit, indicating no need for regularization. The best-performing configuration used no dropout (dropout rate = 0.0) and no L2 regularization. The optimal architecture consisted of 6 hidden layers, each with 37 neurons (matching the input size). Based on these findings, we adopted this architecture for our model.
 
 A key strength of our architecture is its support for Multi-task learning (restaurant guests & article popularity). For this, we incorporated multiple output heads, each dedicated to a specific task. To optimize performance, we used a custom Asymmetric Loss Function.
 
