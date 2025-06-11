@@ -220,7 +220,7 @@ After conducting a hyperparameter search, we found that the model could not over
 
 A key strength of our architecture is its support for Multi-task learning (restaurant guests & article popularity). For this, we incorporated multiple output heads, each dedicated to a specific task. To optimize performance, we used a custom Asymmetric Loss Function.
 
-### Docker
+## Docker
 
 ### Components (services)
 
