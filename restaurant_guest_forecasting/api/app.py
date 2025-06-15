@@ -90,16 +90,19 @@ async def linear_regression_guest_eval():
 async def linear_regression_guest_eval_compare():
     random_guesser    = load_model("random_regression_guesser.pkl")
     linear_regression = load_model("linear_regression.pkl")
-    mlp               = load_mlp(NEURONS, DROPOUT_RATE, ACTIVATION)
-    return {"random_guess_test_mse": f"{test_mse(random_guesser):.2f}",
-            "random_guess_asymmetric_test_mse": f"{test_asymmetric_mse(random_guesser):.2f}",
+    try:
+        mlp               = load_mlp(NEURONS, DROPOUT_RATE, ACTIVATION)
+        return {"random_guess_test_mse": f"{test_mse(random_guesser):.2f}",
+                "random_guess_asymmetric_test_mse": f"{test_asymmetric_mse(random_guesser):.2f}",
 
-            "linear_regression_test_mse": f"{test_mse(linear_regression):.2f}",
-            "linear_regression_asymmetric_test_mse": f"{test_asymmetric_mse(linear_regression):.2f}",
+                "linear_regression_test_mse": f"{test_mse(linear_regression):.2f}",
+                "linear_regression_asymmetric_test_mse": f"{test_asymmetric_mse(linear_regression):.2f}",
 
-            "mlp_test_mse": f"{test_mlp_mse(mlp, normalized=NORMALIZED):.2f}",
-            "mlp_asymmetric_test_mse": f"{test_mlp_asymmetric_mse(mlp, normalized=NORMALIZED):.2f}"
-}
+                "mlp_test_mse": f"{test_mlp_mse(mlp, normalized=NORMALIZED):.2f}",
+                "mlp_asymmetric_test_mse": f"{test_mlp_asymmetric_mse(mlp, normalized=NORMALIZED):.2f}"
+        }
+    except Exception as e:
+        return {"error": f"MLP model not found or failed to load: {str(e)}"}
 
 
 @app.post("/predict_guests/random")
@@ -124,9 +127,13 @@ async def predict_guests_model(input: ModelInput):
     
 @app.post("/predict_guests/mlp")
 async def predict_guests_mlp(input: ModelInput):
-    model = load_mlp(NEURONS, DROPOUT_RATE, ACTIVATION)
     try:
-        prediction = _predict_guests_mlp(model, input)
-        return {"predicted_guests": f"{prediction}"}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        model = load_mlp(NEURONS, DROPOUT_RATE, ACTIVATION)
+        try:
+            prediction = _predict_guests_mlp(model, input)
+            return {"predicted_guests": f"{prediction}"}
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError:
+        raise HTTPException(status_code=400,
+                             detail="MLP model not found. Please train the model first.")

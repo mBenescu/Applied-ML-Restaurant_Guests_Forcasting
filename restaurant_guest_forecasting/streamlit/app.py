@@ -63,7 +63,7 @@ col_defs = [
     {
         "name": "year",
         "type": "number",
-        "min_value": 1900,
+        "min_value": 2018,
         "max_value": 2100,
         "step": 1,
         "format": "%d",
