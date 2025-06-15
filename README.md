@@ -1,7 +1,7 @@
 # Applied ML Project 🛠️
 
 ## Description of the project
-Running a restaurant comes with high costs and complex logistics. Two major challenges are managing inventory to avoid waste and scheduling staff efficiently. While many restaurants keep track of reservations and actual guest counts, it's still tough to predict future demand accurately without the help of advanced tools. For this project, we will focus on solving a real-world problem in colaboration with "Weeva" restaurant, where one of our team members works. Our main goal is to build a model that helps predict how many guests the restaurant will have on a given day. If time allows, we’d also like to explore which menu items are most frequently ordered. We believe that factors like weather, the day of the week, and reservation counts are the key when making reliable predictions.
+Running a restaurant comes with high costs and complex logistics. Two major challenges are managing inventory to avoid waste and scheduling staff efficiently. While many restaurants keep track of reservations and actual guest counts, it's still tough to predict future demand accurately without the help of advanced tools. For this project, we will focus on solving a real-world problem in collaboration with "Weeva" restaurant, where one of our team members works. Our main goal is to build a model that helps predict how many guests the restaurant will have on a given day. If time allows, we’d also like to explore which menu items are most frequently ordered. We believe that factors like weather, the day of the week, and reservation counts are the key when making reliable predictions.
 
 
 ## Data Preprocessing
@@ -50,6 +50,25 @@ The model takes as input various features (date, weather conditions, etc.) and p
 After conducting a hyperparameter search, we found that the model could not overfit, indicating no need for regularization. The best-performing configuration used no dropout (dropout rate = 0.0) and no L2 regularization. The optimal architecture consisted of 6 hidden layers, each with 37 neurons (matching the input size). Based on these findings, we adopted this architecture for our model.
 
 A key strength of our architecture is its support for Multi-task learning (restaurant guests & article popularity). For this, we incorporated multiple output heads, each dedicated to a specific task. To optimize performance, we used a custom Asymmetric Loss Function.
+
+### The pretrained MLP
+The trained model can be found at "path\to\restaurant_guest_forecasting\models\utils\saved_models\guests_mlp.pt".
+
+### Training the MLP - DIY
+To train the MLP themselves, one can run:
+
+```bash
+cd path/to/Applied-ML-Restaurant_Guests_Forcasting
+```
+```bash
+python -m restaurant_guest_forecasting.models.utils.train_mlp
+```
+or
+```bash
+python3 -m restaurant_guest_forecasting.models.utils.train_mlp
+```
+
+Note: The script trains the model with the documented hyperparameters. To chenge them, one needs to change the function `train_save_mlp_guests`. Do keep in mind, that the parameters need to also be modified in `restaurant_guest_forecasting\api\app.py`, so the api can load the model with the exact architecture.
 
 ## API
 We created an API that allows users to send an input and get a prediction back, from a trained model. The API offers the option to use and compare three models: a Random Guesser, a Linear Regression Model, and a Multilayer Perceptron. It also includes proper input validation and returns clear responses, handling HTTPExceptions when something goes wrong.
@@ -106,12 +125,17 @@ cd path/to/Applied-ML-Restaurant_Guests_Forcasting
 
 2. Create a virtual environment
 ```bash
-python -m venv venv
+python -m venv aml_venv
 ```
 
 3. Activate the virtual environment
+   On Windows:
 ```bash
-venv\Scripts\activate
+aml_venv\Scripts\activate
+```
+   On Unix:
+```bash
+aml_venv\bin\activate
 ```
 
 4. Install dependencies
@@ -126,7 +150,7 @@ uvicorn restaurant_guest_forecasting.api.app:app --reload
 
 6. Open the API in your own browser
 ```bash
-http://127.0.0.1:8000/
+http://127.0.0.1:8000/docs
 ```
 
 
@@ -204,7 +228,7 @@ http://127.0.0.1:8000/
 }
 ```
 
-- **GET /predict_guests/compare**: Compare test MSEs and test asymmectric loss for the Random Guesser, Linear Regression and Multi-Layer Preceptron.
+- **GET /predict_guests/compare**: Compare test MSEs and test asymmetric loss for the Random Guesser, Linear Regression and Multi-Layer Perceptron.
 
 **Output example**
 ```bash
@@ -244,14 +268,21 @@ sudo docker-compose up --build
 ```
 
 The API can be accessed on http://localhost:8081
-The API Docs be accessed on http://localhost:8081/docs
+The API Docs can be accessed on http://localhost:8081/docs
 
 ## Streamlit UI
 
 To start the streamlit UI:
 
+Depending on your OS, the starting command can be one of the following:
+
 ```bash
-PYTHONPATH="." streamlit run restaurant_guest_forecasting/streamlit/app.py
+python -m streamlit run restaurant_guest_forecasting.streamlit.app
+```
+or 
+
+```bash
+python3 -m streamlit run restaurant_guest_forecasting.streamlit.app
 ```
 
 or use the `start_ui.sh` script.
