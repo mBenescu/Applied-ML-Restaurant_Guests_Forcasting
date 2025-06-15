@@ -102,7 +102,8 @@ async def linear_regression_guest_eval_compare():
                 "mlp_asymmetric_test_mse": f"{test_mlp_asymmetric_mse(mlp, normalized=NORMALIZED):.2f}"
         }
     except Exception as e:
-        return {"error": f"MLP model not found or failed to load: {str(e)}"}
+        raise HTTPException(status_code=400,
+                             detail="MLP model not found. Please train the model first. " + str(e))
 
 
 @app.post("/predict_guests/random")
